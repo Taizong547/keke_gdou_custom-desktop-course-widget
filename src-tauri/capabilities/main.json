@@ -1,0 +1,27 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-widget",
+  "description": "Allows the main desktop widget to read schedule/settings, exchange events, control only its own window through source-validated application commands, and open the hard-coded presentation controller.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:event:default",
+    "core:window:default",
+    "core:window:allow-set-position",
+    "core:window:allow-current-monitor",
+    "core:window:allow-outer-size",
+    "core:window:allow-outer-position",
+    "core:window:allow-scale-factor",
+    "allow-read-schedule",
+    "allow-read-app-settings",
+    "allow-open-presentation-controller",
+    "allow-configure-main-widget",
+    "allow-resize-main-widget",
+    "allow-show-main-widget",
+    "allow-hide-main-widget",
+    "allow-start-main-widget-drag",
+    "allow-set-main-widget-mode",
+    "allow-set-main-widget-opacity"
+  ]
+}

@@ -1,0 +1,228 @@
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { formatMinutesDuration } from '../src/duration.ts'
+import { PresentationClock, validateReplayConfig } from '../src/presentation-clock.ts'
+
+const config = {
+  date: '2026-09-07',
+  start: '08:00',
+  end: '08:10',
+  minutesPerSecond: 2,
+  loop: false,
+}
+
+validateReplayConfig(config)
+const clock = new PresentationClock()
+let snapshot = clock.start(config, 1_000)
+assert.equal(snapshot.date.getHours(), 8)
+assert.equal(snapshot.date.getMinutes(), 0)
+assert.equal(snapshot.playing, true)
+
+snapshot = clock.snapshot(3_500)
+assert.equal(snapshot.progress, 0.5)
+assert.equal(snapshot.date.getHours(), 8)
+assert.equal(snapshot.date.getMinutes(), 5)
+
+snapshot = clock.pause(3_500)
+assert.equal(snapshot.playing, false)
+assert.equal(clock.snapshot(20_000).progress, 0.5)
+
+snapshot = clock.resume(20_000)
+assert.equal(snapshot.playing, true)
+snapshot = clock.snapshot(22_500)
+assert.equal(snapshot.finished, true)
+assert.equal(snapshot.playing, false)
+assert.equal(snapshot.date.getHours(), 8)
+assert.equal(snapshot.date.getMinutes(), 10)
+
+assert.throws(() => validateReplayConfig({ ...config, end: '07:00' }), /结束时间必须晚于开始时间/)
+assert.throws(() => validateReplayConfig({ ...config, minutesPerSecond: 0 }), /1–5 分钟\/秒/)
+assert.throws(() => validateReplayConfig({ ...config, minutesPerSecond: 6 }), /1–5 分钟\/秒/)
+
+const adjustable = new PresentationClock()
+adjustable.start(config, 0)
+snapshot = adjustable.snapshot(1_000)
+assert.equal(snapshot.date.getMinutes(), 2)
+snapshot = adjustable.setSpeed(5, 1_000)
+assert.equal(snapshot.date.getMinutes(), 2)
+snapshot = adjustable.snapshot(1_600)
+assert.equal(snapshot.progress, 0.5)
+assert.equal(snapshot.date.getMinutes(), 5)
+
+const looping = new PresentationClock()
+looping.start({ ...config, loop: true }, 0)
+snapshot = looping.snapshot(7_500)
+assert.equal(snapshot.finished, false)
+assert.equal(snapshot.progress, 0.5)
+assert.equal(snapshot.date.getHours(), 8)
+assert.equal(snapshot.date.getMinutes(), 5)
+
+assert.equal(formatMinutesDuration(19), '19 分钟')
+assert.equal(formatMinutesDuration(60), '1 小时')
+assert.equal(formatMinutesDuration(96), '1 小时 36 分钟')
+assert.equal(formatMinutesDuration(120), '2 小时')
+
+const widgetSource = readFileSync(new URL('../src/widget.ts', import.meta.url), 'utf8')
+const widgetPageSource = readFileSync(new URL('../src/widget-page.ts', import.meta.url), 'utf8')
+const widgetPageCss = readFileSync(new URL('../src/widget-page.css', import.meta.url), 'utf8')
+const handoffSource = [
+  '../src/course-handoff-types.ts',
+  '../src/course-handoff-dom.ts',
+  '../src/course-handoff-shared.ts',
+  '../src/course-handoff-session.ts',
+  '../src/course-handoff.ts',
+].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8')).join('\n')
+const handoffCss = readFileSync(new URL('../src/course-handoff.css', import.meta.url), 'utf8')
+const timeFlowSource = readFileSync(new URL('../src/time-flow.ts', import.meta.url), 'utf8')
+const timeFlowCss = readFileSync(new URL('../src/time-flow.css', import.meta.url), 'utf8')
+const desktopShellSource = readFileSync(new URL('../src/desktop-shell.ts', import.meta.url), 'utf8')
+const controllerSource = readFileSync(new URL('../src/presentation-page.ts', import.meta.url), 'utf8')
+const eventSource = readFileSync(new URL('../src/presentation-events.ts', import.meta.url), 'utf8')
+const websiteDemoSource = [
+  '../website/docs/.vitepress/theme/website-demo.ts',
+  '../website/docs/.vitepress/theme/website-demo-core.ts',
+  '../website/docs/.vitepress/theme/website-demo-hero.ts',
+  '../website/docs/.vitepress/theme/website-demo-experience.ts',
+].map((path) => readFileSync(new URL(path, import.meta.url), 'utf8')).join('\n')
+const websiteThemeSource = readFileSync(new URL('../website/docs/.vitepress/theme/index.ts', import.meta.url), 'utf8')
+const tauriConfig = readFileSync(new URL('../src-tauri/tauri.conf.json', import.meta.url), 'utf8')
+
+assert.match(widgetSource, /now\?: Date/)
+assert.match(widgetSource, /const now = options\.now \? new Date\(options\.now\) : new Date\(\)/)
+assert.match(widgetSource, /const today = startOfDay\(options\.now \?\? new Date\(\)\)/)
+assert.match(widgetSource, /<div class="widget-body">/)
+assert.match(widgetSource, /formatMinutesDuration\(parseTime\(model\.focus\.end\) - nowMinutes\)/)
+assert.match(widgetSource, /formatMinutesDuration\(parseTime\(model\.focus\.start\) - nowMinutes\)/)
+assert.match(timeFlowSource, /formatMinutesDuration\(minutesUntilEnd\)/)
+
+const widgetPageCssImport = widgetPageSource.indexOf("import './widget-page.css'")
+const handoffCssImport = widgetPageSource.indexOf("import './course-handoff.css'")
+const timeFlowCssImport = widgetPageSource.indexOf("import './time-flow.css'")
+assert.ok(widgetPageCssImport >= 0 && widgetPageCssImport < handoffCssImport && handoffCssImport < timeFlowCssImport)
+assert.match(widgetPageSource, /invoke\('open_presentation_controller'\)/)
+assert.match(widgetPageSource, /PRESENTATION_COMMAND_EVENT/)
+assert.match(widgetPageSource, /presentationClock\.pause\(timestamp\)/)
+assert.match(widgetPageSource, /presentationClock\.setSpeed\(minutesPerSecond/)
+assert.match(widgetPageSource, /transitionCourse\(\{[\s\S]*host: app,[\s\S]*durationScale: 1,[\s\S]*reducedMotion: false/)
+assert.match(widgetPageSource, /activeHandoff\?\.cancel\('target'\)/)
+assert.match(widgetPageSource, /void handoff\.finished\.then/)
+assert.match(widgetPageSource, /finishCourseTransition\(token, resumeAfterTransition\)/)
+assert.match(widgetPageSource, /window\.dispatchEvent\(new Event\('course-transition:complete'\)\)/)
+assert.match(widgetPageSource, /transitioning: transitionActive/)
+assert.match(widgetPageSource, /COURSE_TRANSITION_SETTLE_MS = 420/)
+assert.doesNotMatch(widgetPageSource, /function findSharedCourseSource|course-shared-morph|course-final-wipe/)
+
+assert.match(handoffSource, /export function transitionCourse/)
+assert.match(handoffSource, /export function courseIdentityKey/)
+assert.match(handoffSource, /export function findSharedCourseSource/)
+assert.match(handoffSource, /exit: 640/)
+assert.match(handoffSource, /exitGap: 70/)
+assert.match(handoffSource, /sharedMove: 2100/)
+assert.match(handoffSource, /shellReveal: 900/)
+assert.match(handoffSource, /finalWipe: 760/)
+assert.match(handoffSource, /finalReveal: 420/)
+assert.match(handoffSource, /textHandoff: 420/)
+assert.match(handoffSource, /resize: 1150/)
+assert.match(handoffSource, /normalEnter: 1500/)
+assert.match(handoffSource, /function transitionPrimaryParts/)
+assert.match(handoffSource, /nextBody\.querySelector<HTMLElement>\('\.focus-course'\) \?\? transitionPrimary\(nextBody\)/)
+assert.match(handoffSource, /const resizeAnimation = this\.animate\(stage/)
+assert.match(handoffSource, /await Promise\.all\(\[\s*resizeAnimation,[\s\S]*\.\.\.enteringPrimary\.map/)
+assert.doesNotMatch(handoffSource, /await this\.animate\(transitionPrimary\(nextBody\)/)
+assert.match(handoffSource, /stage\.style\.height = `\$\{targetHeight\}px`[\s\S]*clearElementAnimations\(stage\)[\s\S]*stage\.replaceWith\(nextBody\)/)
+assert.doesNotMatch(handoffSource, /@tauri-apps|WebviewWindow|PresentationClock|presentation-events|#app|getCurrentWindow|system time/i)
+assert.match(handoffSource, /const activeSessions = new WeakMap/)
+assert.match(handoffSource, /activeSessions\.get\(host\)\?\.cancel\('target'\)/)
+assert.match(handoffSource, /source\.dataset\.sharedSourceHidden = 'true'/)
+assert.match(handoffSource, /source\.style\.visibility = 'hidden'/)
+assert.match(handoffSource, /overlay\.append\(floating\)/)
+assert.match(handoffSource, /sharedTextMotion\(sourceTitle, targetTitleCopy, overlay\)/)
+assert.match(handoffSource, /sharedTextMotion\(sourceLocation, targetLocationCopy, overlay\)/)
+assert.match(handoffSource, /sharedTextMotion\(sourceTime, targetTimePrefix, overlay\)/)
+assert.match(handoffSource, /wipe\.className = 'course-final-wipe'/)
+assert.match(handoffSource, /wipeBeam\.className = 'course-final-wipe-beam'/)
+assert.match(handoffSource, /delay: 52 \+ index \* 12/)
+assert.match(handoffSource, /emitPhase\(options, 'reduced-motion'\)/)
+assert.match(handoffSource, /this\.settle\(settleTo\)/)
+assert.match(handoffSource, /cleanupTransient\(this\.host\)/)
+
+const ownershipHelper = handoffSource.indexOf('function transferSharedTextOwnership')
+const movingCopyHidden = handoffSource.indexOf("motion.element.style.visibility = 'hidden'", ownershipHelper)
+const targetCopyRevealed = handoffSource.indexOf("copy.classList.remove('is-shared-copy-hidden')", ownershipHelper)
+assert.ok(ownershipHelper >= 0 && movingCopyHidden > ownershipHelper && movingCopyHidden < targetCopyRevealed)
+
+const wipeRevealStart = handoffSource.indexOf('const wipeAndSupportingReveal = Promise.all([')
+const movingCopyFade = handoffSource.lastIndexOf('await Promise.all(motions.map')
+const ownershipTransfer = handoffSource.indexOf('transferSharedTextOwnership(motions, targetCopies, runtime.phase)', movingCopyFade)
+const wipeRevealAwait = handoffSource.indexOf('await wipeAndSupportingReveal', ownershipTransfer)
+const overlayRemoval = handoffSource.indexOf('overlay.remove()', wipeRevealAwait)
+const targetDomHandoff = handoffSource.indexOf('targetPrimary.replaceWith(targetLayer)', overlayRemoval)
+const nextBodySwap = handoffSource.indexOf('stage.replaceChildren(nextBody)', targetDomHandoff)
+const contentInstalled = handoffSource.indexOf("this.phase('content-installed')", nextBodySwap)
+const resizing = handoffSource.indexOf("this.phase('resizing')", contentInstalled)
+const finalBodySwap = handoffSource.indexOf('stage.replaceWith(nextBody)', resizing)
+assert.ok(wipeRevealStart < movingCopyFade && movingCopyFade < ownershipTransfer && ownershipTransfer < wipeRevealAwait)
+assert.ok(wipeRevealAwait < overlayRemoval && overlayRemoval < targetDomHandoff)
+assert.ok(targetDomHandoff < nextBodySwap && nextBodySwap < contentInstalled && contentInstalled < resizing && resizing < finalBodySwap)
+assert.doesNotMatch(handoffSource.slice(contentInstalled, resizing), /\bawait\b/)
+
+assert.match(widgetPageCss, /perspective: 1000px/)
+assert.match(widgetPageCss, /\.widget-body \{[\s\S]*display: flow-root/)
+assert.doesNotMatch(widgetPageCss, /course-transition-overlay|course-shared-morph|is-course-transitioning/)
+assert.match(handoffCss, /\.widget-body-handoff/)
+assert.match(handoffCss, /\.course-shared-morph/)
+assert.match(handoffCss, /\.course-transition-overlay/)
+assert.match(handoffCss, /\.course-shared-float/)
+assert.match(handoffCss, /\.course-final-wipe/)
+assert.match(handoffCss, /\.course-final-wipe-beam/)
+assert.match(handoffCss, /\.is-course-handoff-active/)
+assert.match(handoffCss, /visibility: hidden/)
+assert.match(handoffCss, /is-size-settling/)
+assert.match(handoffCss, /animation: none !important/)
+const transitionOverlayRule = /\.course-transition-overlay\s*\{([^}]*)\}/.exec(handoffCss)?.[1] ?? ''
+assert.match(transitionOverlayRule, /position: absolute/)
+assert.match(transitionOverlayRule, /overflow: hidden/)
+assert.doesNotMatch(transitionOverlayRule, /position: fixed|overflow: visible/)
+const currentBodyRule = /\.widget-body-handoff > \.widget-body\.is-handoff-current\s*\{([^}]*)\}/.exec(handoffCss)?.[1] ?? ''
+const overlayZIndex = Number(/z-index:\s*(\d+)/.exec(transitionOverlayRule)?.[1])
+const currentBodyZIndex = Number(/z-index:\s*(\d+)/.exec(currentBodyRule)?.[1])
+assert.equal(overlayZIndex, 6)
+assert.ok(overlayZIndex > currentBodyZIndex)
+assert.doesNotMatch(handoffCss, /mix-blend-mode|::view-transition|is-shared-reflowing/)
+
+const experienceStart = websiteDemoSource.indexOf('function setupExperienceHeroDemo')
+const experienceSource = websiteDemoSource.slice(experienceStart)
+assert.match(websiteDemoSource, /from '\.\.\/\.\.\/\.\.\/\.\.\/src\/course-handoff'/)
+assert.match(experienceSource, /durationScale: 0\.7/)
+assert.match(experienceSource, /activeHandoff\?\.cancel|handoff\?\.cancel/)
+assert.match(experienceSource, /void handoff\.finished\.then/)
+assert.match(experienceSource, /window\.matchMedia\('\(prefers-reduced-motion: reduce\)'\)/)
+assert.match(experienceSource, /document\.addEventListener\('visibilitychange'/)
+assert.match(experienceSource, /document\.removeEventListener\('visibilitychange'/)
+assert.match(experienceSource, /window\.setTimeout/)
+assert.doesNotMatch(experienceSource, /window\.setInterval/)
+const finishedCallback = experienceSource.indexOf('void handoff.finished.then')
+const timerAfterFinished = experienceSource.indexOf('scheduleTimer()', finishedCallback)
+assert.ok(finishedCallback >= 0 && timerAfterFinished > finishedCallback)
+assert.match(websiteThemeSource, /src\/course-handoff\.css/)
+
+assert.match(desktopShellSource, /let pendingHeight: number \| undefined/)
+assert.match(desktopShellSource, /while \(pendingHeight !== undefined\)/)
+assert.match(desktopShellSource, /resizeDeferredForTransition/)
+assert.match(desktopShellSource, /classList\.contains\('is-course-transitioning'\)/)
+assert.match(desktopShellSource, /course-transition:complete/)
+assert.match(desktopShellSource, /applyDeferredTransitionSize/)
+assert.match(desktopShellSource, /invoke<MainWindowMetrics>\('resize_main_widget'/)
+assert.match(controllerSource, /PRESENTATION_STATUS_REQUEST_EVENT/)
+assert.match(controllerSource, /录制时只捕获课刻窗口/)
+assert.match(controllerSource, /min="1" max="5"/)
+assert.match(controllerSource, /type: 'set-speed'/)
+assert.match(eventSource, /type: 'set-speed'/)
+const baseFocusRule = /\.course-widget \.focus-course \{([^}]*)\}/.exec(timeFlowCss)?.[1] ?? ''
+assert.match(baseFocusRule, /position:\s*relative/)
+assert.doesNotMatch(baseFocusRule, /animation:/)
+assert.match(timeFlowCss, /\.course-widget\.is-initial-mount \.focus-course \{[\s\S]*animation: time-flow-enter/)
+assert.match(tauriConfig, /"label": "presentation"/)
+assert.doesNotMatch(widgetPageSource, /presentation-panel|withPresentationDate/)
+
+console.log('presentation clock and shared course handoff architecture checks passed')

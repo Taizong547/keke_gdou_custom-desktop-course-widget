@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Import review DOM regression</title>
+  </head>
+  <body>
+    <main class="import-review-surface">
+      <div class="surface-intro">
+        <h3 class="import-step-title">1 · 选择文件</h3>
+        <p>先逐项检查识别结果，再创建新课表；已有课表不会被覆盖。</p>
+      </div>
+      <div class="import-summary">
+        <div><strong>2 项</strong></div>
+        <div><strong>3 周</strong></div>
+        <div><strong>1 项</strong></div>
+      </div>
+      <div class="import-review-heading">
+        <div><h3>2 · 检查解析结果</h3><p>展开课程可修改星期、节次、周次、地点和老师。</p></div>
+        <span>2 项</span>
+      </div>
+      <div class="import-review-list">
+        <select data-import-field="startSection">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+        </select>
+      </div>
+      <p class="surface-message" role="status"></p>
+    </main>
+    <footer class="surface-actions surface-actions--end">
+      <span class="import-step-label">3 · 确认创建</span>
+      <button type="button" data-action="create-imported-schedule">确认并创建课表</button>
+    </footer>
+    <pre id="result" data-status="pending">PENDING</pre>
+    <script type="module" src="/scripts/import-review-dom.test.ts"></script>
+  </body>
+</html>

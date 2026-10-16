@@ -1,0 +1,46 @@
+[package]
+name = "desktop-course-widget"
+version = "1.0.0"
+description = "课刻-广东海洋大学定制版 By权爷：本地优先的 Windows 桌面课表组件，适配广东海洋大学教务系统"
+authors = ["权爷 (fork of Tyr1onX)"]
+license = "MIT"
+repository = "https://github.com/Tyr1onX/desktop-course-widget"
+edition = "2021"
+rust-version = "1.77.2"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "desktop_course_widget_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "ocr-native-spike"
+path = "src/bin/ocr_native_spike.rs"
+required-features = ["ocr-native-spike"]
+
+[features]
+default = ["native-ocr"]
+native-ocr = ["dep:image", "dep:ocr-rs"]
+ocr-native-spike = ["native-ocr"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3", features = [] }
+
+[dependencies]
+calamine = "0.26"
+chrono = "0.4"
+image = { version = "=0.25.10", optional = true }
+ocr-rs = { version = "=2.4.0", optional = true }
+regex = "1"
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2.11.5", features = ["tray-icon"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2.4.1"
+
+[target.'cfg(all(windows, target_env = "msvc"))'.dependencies]
+ocr-rs = { version = "=2.4.0", optional = true, features = ["build-mnn-from-source"] }

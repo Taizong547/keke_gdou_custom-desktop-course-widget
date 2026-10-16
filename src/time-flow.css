@@ -1,0 +1,159 @@
+.course-widget {
+  --identity-accent: #2f7eef;
+  --identity-accent-rgb: 47, 126, 239;
+  --ambient-accent: #6e9bd0;
+  --ambient-accent-rgb: 110, 155, 208;
+  --urgency-accent: #b9894b;
+  --urgency-accent-rgb: 185, 137, 75;
+  --progress-start: #4d8fe8;
+  --progress-end: #72a7f5;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.course-widget.theme-dark {
+  --identity-accent: #78a9f5;
+  --identity-accent-rgb: 120, 169, 245;
+  --urgency-accent: #e0bf79;
+  --urgency-accent-rgb: 224, 191, 121;
+  --progress-start: #6ba2f3;
+  --progress-end: #91bbf8;
+}
+
+.course-widget::before {
+  position: absolute;
+  z-index: -1;
+  inset: -42% -28% auto;
+  height: 76%;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(var(--ambient-accent-rgb), .065), transparent 68%);
+  transform: translate3d(0, 0, 0);
+}
+
+.course-widget.tone-morning { --ambient-accent: #d2ad6f; --ambient-accent-rgb: 210, 173, 111; }
+.course-widget.tone-day { --ambient-accent: #6e9bd0; --ambient-accent-rgb: 110, 155, 208; }
+.course-widget.tone-evening { --ambient-accent: #8b7fb6; --ambient-accent-rgb: 139, 127, 182; }
+.course-widget.tone-night { --ambient-accent: #70829c; --ambient-accent-rgb: 112, 130, 156; }
+
+/* Stable identity elements share one softened blue language. */
+.course-widget .today-badge,
+.course-widget .focus-kicker,
+.course-widget .section-label,
+.course-widget .countdown {
+  color: var(--identity-accent);
+}
+
+.course-widget .today-badge {
+  background: rgba(var(--identity-accent-rgb), .09);
+}
+
+.course-widget .focus-course {
+  position: relative;
+  background: linear-gradient(115deg, rgba(var(--identity-accent-rgb), .075), rgba(var(--identity-accent-rgb), .022));
+  transition: background-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.course-widget.is-initial-mount .focus-course {
+  animation: time-flow-enter 420ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.course-widget.theme-dark .focus-course {
+  background: linear-gradient(115deg, rgba(var(--identity-accent-rgb), .14), rgba(var(--identity-accent-rgb), .045));
+}
+
+.course-widget .focus-course.is-current {
+  box-shadow: inset 3px 0 0 rgba(var(--identity-accent-rgb), .82);
+}
+
+.course-widget .focus-course.is-soon {
+  box-shadow: inset 0 0 0 1px rgba(var(--identity-accent-rgb), .14);
+}
+
+/* Imminent classes use a muted champagne-gold signal instead of saturated orange. */
+.course-widget .focus-course.is-imminent {
+  background: linear-gradient(115deg, rgba(var(--urgency-accent-rgb), .085), rgba(var(--identity-accent-rgb), .022));
+  box-shadow: inset 0 0 0 1px rgba(var(--urgency-accent-rgb), .17), 0 8px 22px rgba(var(--urgency-accent-rgb), .03);
+}
+
+.course-widget .focus-course.is-imminent .focus-kicker,
+.course-widget .focus-course.is-imminent .countdown {
+  color: var(--urgency-accent);
+}
+
+.course-widget.theme-dark .focus-course.is-imminent {
+  background: linear-gradient(115deg, rgba(var(--urgency-accent-rgb), .12), rgba(var(--identity-accent-rgb), .05));
+  box-shadow: inset 0 0 0 1px rgba(var(--urgency-accent-rgb), .18), 0 8px 22px rgba(var(--urgency-accent-rgb), .03);
+}
+
+.course-flow {
+  display: grid;
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.course-flow-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #526d87;
+  font-size: calc(10px * var(--widget-scale));
+  font-weight: 680;
+  font-variant-numeric: tabular-nums;
+}
+
+.theme-dark .course-flow-meta {
+  color: #c0cede;
+}
+
+.course-widget.theme-dark .timeline time {
+  color: #9fb4cc;
+}
+
+.course-widget.theme-dark .timeline small {
+  color: #b6c5d8;
+}
+
+/* Progress belongs to the active blue state; time of day stays ambient only. */
+.course-flow-track {
+  height: calc(4px * var(--widget-scale));
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(var(--identity-accent-rgb), .12);
+}
+
+.course-flow-track > span {
+  display: block;
+  width: calc(var(--course-progress) * 100%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--progress-start), var(--progress-end));
+  box-shadow: 0 0 8px rgba(var(--identity-accent-rgb), .12);
+  transition: width 800ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.course-widget .timeline li::after {
+  background: var(--identity-accent);
+  box-shadow: 0 0 0 3px rgba(var(--identity-accent-rgb), .1);
+}
+
+.course-widget.is-date-browsing::before {
+  opacity: .24;
+}
+
+@keyframes time-flow-enter {
+  from { opacity: .72; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .course-widget .focus-course { animation: none; }
+  .course-flow-track > span { transition: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .course-widget::before { display: none; }
+}

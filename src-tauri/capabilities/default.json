@@ -1,0 +1,40 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "settings",
+  "description": "Allows the settings window to manage schedules, imports, app settings, local data controls, and hide only itself through a source-validated application command. File selection remains backend-owned.",
+  "windows": [
+    "settings"
+  ],
+  "permissions": [
+    "core:event:default",
+    "allow-hide-settings-window",
+    "allow-read-schedule",
+    "allow-read-app-settings",
+    "allow-get-runtime-capabilities",
+    "allow-save-lesson-times",
+    "allow-choose-and-parse-excel",
+    "allow-choose-and-parse-screenshot",
+    "allow-apply-imported-schedule",
+    "schedule-catalog:allow-list-schedules",
+    "schedule-catalog:allow-get-active-schedule",
+    "schedule-catalog:allow-get-schedule",
+    "schedule-catalog:allow-update-schedule",
+    "schedule-catalog:allow-activate-schedule",
+    "schedule-catalog:allow-delete-schedule",
+    "schedule-catalog:allow-create-schedule-from-import",
+    "schedule-catalog:allow-save-course",
+    "schedule-catalog:allow-delete-course",
+    "schedule-catalog:allow-read-autostart",
+    "schedule-catalog:allow-set-autostart",
+    "schedule-catalog:allow-open-data-location",
+    "allow-save-ball-mode",
+    "allow-save-widget-opacity",
+    "allow-save-widget-style",
+    "allow-save-special-rules",
+    "allow-save-app-font-scale",
+    "allow-apply-widget-style",
+    "allow-set-main-widget-mode",
+    "allow-set-main-widget-opacity",
+    "allow-recognize-png-data"
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "课刻-广东海洋大学定制版",
+  "version": "1.0.0",
+  "identifier": "com.coursewidget.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://127.0.0.1:1420/widget.html",
+    "beforeDevCommand": "npm run web:dev -- --host 127.0.0.1 --port 1420",
+    "beforeBuildCommand": "node scripts/generate-installer-branding.mjs && npm run web:build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "课刻-广东海洋大学定制版",
+        "url": "widget.html",
+        "width": 64,
+        "height": 64,
+        "minWidth": 64,
+        "minHeight": 64,
+        "maxWidth": 800,
+        "maxHeight": 1200,
+        "resizable": true,
+        "maximizable": false,
+        "minimizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "skipTaskbar": true,
+        "alwaysOnTop": false,
+        "alwaysOnBottom": false,
+        "visible": false,
+        "zoomHotkeysEnabled": false
+      },
+      {
+        "label": "settings",
+        "title": "课刻-广东海洋大学定制版 · 课表与设置",
+        "url": "settings.html",
+        "width": 1180,
+        "height": 760,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "shadow": true,
+        "skipTaskbar": false,
+        "alwaysOnTop": false,
+        "alwaysOnBottom": false,
+        "visible": false,
+        "center": true,
+        "zoomHotkeysEnabled": false
+      },
+      {
+        "label": "presentation",
+        "title": "课刻-广东海洋大学定制版 · 演示控制器",
+        "url": "presentation.html",
+        "width": 520,
+        "height": 640,
+        "minWidth": 420,
+        "minHeight": 560,
+        "resizable": true,
+        "maximizable": false,
+        "minimizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "shadow": true,
+        "skipTaskbar": false,
+        "alwaysOnTop": true,
+        "alwaysOnBottom": false,
+        "visible": false,
+        "center": true,
+        "zoomHotkeysEnabled": false
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self' customprotocol: asset:",
+        "script-src": "'self' 'wasm-unsafe-eval'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' asset: http://asset.localhost data: blob:",
+        "font-src": "'self' data:",
+        "connect-src": "ipc: http://ipc.localhost",
+        "object-src": "'none'",
+        "frame-src": "'none'",
+        "base-uri": "'self'",
+        "form-action": "'self'",
+        "worker-src": "'self' blob:"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "publisher": "权爷",
+    "copyright": "Copyright © 2026 权爷 (fork of Tyr1onX/desktop-course-widget)",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "template": "installer/installer-v2.nsi",
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "sidebarImage": "installer/sidebar.bmp",
+        "languages": [
+          "SimpChinese"
+        ]
+      }
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    },
+    "resources": [
+      "resources/ocr-native/*"
+    ]
+  }
+}

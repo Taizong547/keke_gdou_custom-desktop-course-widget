@@ -1,0 +1,129 @@
+html,
+body,
+#app {
+  width: max-content;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+body { display: inline-block; }
+
+#app {
+  display: grid;
+  padding: 12px 16px 20px;
+  perspective: 1000px;
+  place-items: start;
+}
+
+.widget-drag-surface.is-desktop-drag {
+  cursor: move;
+  user-select: none;
+}
+
+.widget-drag-surface.is-desktop-drag:active { cursor: move; }
+
+.widget-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+/* ---- 悬浮球模式 ---- */
+.widget-ball {
+  display: flex;
+  width: 86%;
+  height: 86%;
+  margin: 7% auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  background: var(--ball-bg, linear-gradient(150deg, #2a3f5c 0%, #1b2a3f 55%, #111a28 100%));
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  color: #f2f6fb;
+  font-family: inherit;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.widget-ball:hover { transform: scale(1.04); box-shadow: 0 0 8px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+.widget-ball:active { transform: scale(0.96); }
+.widget-ball:focus-visible { outline: 2px solid rgba(120, 170, 255, 0.72); outline-offset: 2px; }
+.widget-ball-time { font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: 0.2px; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+.widget-ball-weekday { font-size: 11px; line-height: 1; opacity: 0.85; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+/* 悬浮球颜色跟随背景风格 */
+html.widget-bg-light .widget-ball { background: linear-gradient(150deg, #e8eef5 0%, #d4dce8 55%, #c4cddb 100%); color: #1a2a3a; border-color: rgba(0,0,0,0.1); }
+html.widget-bg-light .widget-ball-time, html.widget-bg-light .widget-ball-weekday { text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
+html.widget-bg-blue .widget-ball { background: linear-gradient(150deg, #4a8fe8 0%, #3a7bd5 55%, #2a6bc5 100%); }
+html.widget-bg-colorful .widget-ball { background: linear-gradient(150deg, #5a8af0 0%, #8b5cf6 50%, #ec4899 100%); }
+
+/* 悬浮球模式：全宽居中、零 padding，球不超出窗口 */
+html.widget-ball-active,
+html.widget-ball-active body,
+html.widget-ball-active #app {
+  width: 100%;
+  max-width: 100%;
+}
+html.widget-ball-active #app {
+  padding: 0;
+  place-items: center;
+}
+
+/* 从悬浮球展开卡片：一次性的放大展开动画 */
+html.widget-expanding .course-widget {
+  animation: widget-pop-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  transform-origin: center top;
+}
+@keyframes widget-pop-in {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+}
+
+/* 组件卡片里的“收起为悬浮球”按钮 */
+.widget-ball-toggle {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: #52677d;
+  background: transparent;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.46;
+  transition: color 120ms ease, background-color 120ms ease, opacity 120ms ease, transform 120ms cubic-bezier(.23,1,.32,1);
+}
+.theme-dark .widget-ball-toggle { color: #c0cede; }
+.widget-ball-toggle:focus-visible { outline: 2px solid rgba(10, 117, 232, .72); outline-offset: 2px; opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .widget-drag-surface:hover .widget-ball-toggle { opacity: 1; }
+  .widget-ball-toggle:hover { color: #263c54; background: rgba(82, 103, 125, .12); }
+  .theme-dark .widget-ball-toggle:hover { color: #f0f6ff; background: rgba(210, 226, 245, .12); }
+}
+
+/* 右下角拖拽调整大小手柄 */
+.widget-resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  z-index: 10;
+  background: linear-gradient(135deg, transparent 50%, rgba(10, 117, 232, 0.35) 50%, rgba(10, 117, 232, 0.35) 60%, transparent 60%, transparent 70%, rgba(10, 117, 232, 0.35) 70%, rgba(10, 117, 232, 0.35) 80%, transparent 80%);
+  opacity: 0.5;
+  transition: opacity 120ms ease;
+}
+.widget-resize-handle:hover { opacity: 1; }
+.theme-dark .widget-resize-handle {
+  background: linear-gradient(135deg, transparent 50%, rgba(120, 180, 255, 0.4) 50%, rgba(120, 180, 255, 0.4) 60%, transparent 60%, transparent 70%, rgba(120, 180, 255, 0.4) 70%, rgba(120, 180, 255, 0.4) 80%, transparent 80%);
+}
+.course-widget { position: relative; }

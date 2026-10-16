@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.tmp/
+.venv/
+__pycache__/
+*.local
+
+# Tauri AppManifest build output. Application permissions are generated from
+# the Rust command manifest during compilation and are not source files.
+src-tauri/permissions/
+
+# Deterministic NSIS branding assets generated before each Tauri build.
+src-tauri/installer/*.bmp
+src-tauri/installer/installer-v2.nsi
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local, privacy-sensitive course samples and generated import artifacts.
+samples/private_examples/
