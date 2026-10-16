@@ -5,7 +5,7 @@
 <div align="center">
 
 <p align="center">
-  <img src="src-tauri/icons/icon.png" alt="课刻-广东海洋大学定制版 By权爷" width="120" />
+  <img src="src-tauri/icons/icon.png" alt="课刻-广东海洋大学定制版" width="120" />
 </p>
 
 **让一天在桌面上缓慢流动。**
@@ -39,7 +39,7 @@ Windows 10 / 11 · 免费开源 · 无需账号 · 数据只保存在本机
 
 ![导出课刻](docs/导出课刻.png)
 
-**使用流程**：选定学年学期 → 选择本学期第一个星期一 → 点击"导出课刻" → 得到标准 Excel 课表 → 在"课表与设置"中导入，即可生成桌面组件。
+**使用流程**：打开https://wfw.gdou.edu.cn/ →选定学年学期 → 选择本学期第一个星期一 → 点击"导出课刻" → 得到标准 Excel 课表 → 在"课表与设置"中导入，即可生成桌面组件。
 
 ## 相对原版新增的功能
 
